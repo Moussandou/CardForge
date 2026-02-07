@@ -70,14 +70,14 @@ export class ControlPanel {
             </div>
             <span>Minimal</span>
           </button>
-          <button class="preset-btn" data-preset="gaming">
+          <button class="preset-btn" data-preset="credit-card">
             <div class="preset-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="2" y="4" width="20" height="16" rx="2"/>
-                <circle cx="12" cy="12" r="3"/>
+                <rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="2" y1="10" x2="22" y2="10"></line>
               </svg>
             </div>
-            <span>Gaming</span>
+            <span>Credit Card</span>
           </button>
         </div>
       </div>
@@ -243,21 +243,7 @@ export class ControlPanel {
         </button>
       </div>
 
-      <div class="export-group">
-        <button class="btn-action primary" id="exportSTL">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-          </svg>
-          Telecharger STL
-        </button>
-        <button class="btn-action secondary" id="exportOBJ">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-          </svg>
-          Telecharger OBJ
-        </button>
-      </div>
+
     `;
   }
 
@@ -351,9 +337,9 @@ export class ControlPanel {
     });
 
     // Export buttons
-    document.getElementById('exportSTL')?.addEventListener('click', () => this.onExport('stl'));
-    document.getElementById('exportOBJ')?.addEventListener('click', () => this.onExport('obj'));
+    // Export buttons (Header)
     document.getElementById('quickExportBtn')?.addEventListener('click', () => this.onExport('stl'));
+    document.getElementById('headerExportOBJ')?.addEventListener('click', () => this.onExport('obj'));
 
     // Toolbar controls
     this.attachToolbarEvents();
@@ -372,10 +358,10 @@ export class ControlPanel {
         this.params.height = 55;
         this.params.depth = 1.5;
         break;
-      case 'gaming':
-        this.params.width = 90;
-        this.params.height = 60;
-        this.params.depth = 3;
+      case 'credit-card':
+        this.params.width = 85.6;
+        this.params.height = 54;
+        this.params.depth = 0.8;
         break;
     }
     document.getElementById('width').value = this.params.width;
@@ -434,6 +420,11 @@ export class ControlPanel {
         e.currentTarget.classList.add('active');
         this.activePanel = e.currentTarget.dataset.panel;
         this.showPanelSection(this.activePanel);
+
+        // Move camera to focus area
+        if (this.sceneRef && this.sceneRef.moveCameraTo) {
+          this.sceneRef.moveCameraTo(this.activePanel);
+        }
       });
     });
   }

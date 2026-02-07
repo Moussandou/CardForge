@@ -126,17 +126,64 @@ export class Scene {
 
     toggleGrid() {
         this.gridVisible = !this.gridVisible;
-
-        if (this.gridVisible) {
-            this.gridHelper.visible = true;
-            gsap.fromTo(this.gridHelper.material, { opacity: 0 }, { opacity: 1, duration: 0.3 });
-        } else {
-            gsap.to(this.gridHelper.material, {
-                opacity: 0,
-                duration: 0.3,
-                onComplete: () => { this.gridHelper.visible = false; }
-            });
+        if (this.gridHelper) {
+            this.gridHelper.visible = this.gridVisible;
         }
+    }
+
+    /**
+     * Déplace la caméra vers une vue prédéfinie
+     * @param {string} viewName - 'default', 'text', 'thickness', 'left', 'right', 'top'
+     */
+    moveCameraTo(viewName) {
+        let targetPos = this.defaultCameraPosition.clone();
+        let lookAtPos = new THREE.Vector3(0, 0, 0);
+
+        switch (viewName) {
+            case 'text':
+                // Zoom sur la face avant
+                targetPos.set(0, 0, 70);
+                lookAtPos.set(0, 0, 0);
+                break;
+            case 'shape':
+            case 'dimensions':
+                // Vue de profil accentuée
+                targetPos.set(60, 40, 80);
+                lookAtPos.set(0, 0, 0);
+                break;
+            case 'logo':
+            case 'images':
+            case 'qrcode':
+                // Vue légèrement rapprochée dessus
+                targetPos.set(0, 80, 40);
+                break;
+            case 'background':
+                // Vue d'ensemble reculée
+                targetPos.set(0, 60, 180);
+                break;
+            case 'default':
+            default:
+                targetPos.copy(this.defaultCameraPosition);
+                break;
+        }
+
+        // Animation fluide avec GSAP
+        gsap.to(this.camera.position, {
+            x: targetPos.x,
+            y: targetPos.y,
+            z: targetPos.z,
+            duration: 1.2,
+            ease: 'power3.inOut'
+        });
+
+        gsap.to(this.controls.target, {
+            x: lookAtPos.x,
+            y: lookAtPos.y,
+            z: lookAtPos.z,
+            duration: 1.2,
+            ease: 'power3.inOut',
+            onUpdate: () => this.controls.update()
+        });
     }
 
     animate() {

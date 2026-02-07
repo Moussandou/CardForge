@@ -45,25 +45,25 @@ class CardForgeApp {
         });
 
         await this.textManager.updateMainText(
-            params.mainText,
+            params.mainText || params.fullName || 'John Doe',
             {
-                size: params.mainTextSize,
+                size: params.mainTextSize || 6,
                 height: params.depth * 0.5,
-                positionY: params.mainTextPositionY,
-                mode: params.mainTextMode,
-                color: params.mainTextColor
+                positionY: params.mainTextPositionY || 10,
+                mode: params.mainTextMode || 'emboss',
+                color: params.mainTextColor || 0x2d2640
             },
             this.card.getGroup()
         );
 
         await this.textManager.updateSecondaryText(
-            params.secondaryText,
+            params.secondaryText || params.jobTitle || 'CEO & Founder',
             {
-                size: params.secondaryTextSize,
+                size: params.secondaryTextSize || 4,
                 height: params.depth * 0.4,
-                positionY: params.secondaryTextPositionY,
-                mode: params.mainTextMode,
-                color: params.secondaryTextColor
+                positionY: params.secondaryTextPositionY || -5,
+                mode: params.mainTextMode || 'emboss',
+                color: params.secondaryTextColor || 0x6b5f7a
             },
             this.card.getGroup()
         );
