@@ -8,12 +8,12 @@ import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 export class TextManager {
     constructor() {
         this.font = null;
-        this.mainTextMesh = null;
-        this.secondaryTextMesh = null;
+        this.texts = new Map(); // Stores text meshes by ID
         this.loadFont();
     }
 
     async loadFont() {
+        if (this.font) return this.font;
         const loader = new FontLoader();
         return new Promise((resolve) => {
             loader.load(
@@ -26,21 +26,22 @@ export class TextManager {
         });
     }
 
-    async updateMainText(text, options, parentGroup) {
+    async updateText(id, content, options, parentGroup) {
         if (!this.font) await this.loadFont();
-
-        if (this.mainTextMesh) {
-            parentGroup.remove(this.mainTextMesh);
-            this.mainTextMesh.geometry.dispose();
-            this.mainTextMesh.material.dispose();
+        if (!content) {
+            this.removeText(id, parentGroup);
+            return;
         }
 
-        if (!text) return;
+        // Cleanup existing mesh for this ID
+        if (this.texts.has(id)) {
+            this.removeText(id, parentGroup);
+        }
 
-        const geometry = new TextGeometry(text, {
+        const geometry = new TextGeometry(content, {
             font: this.font,
-            size: options.size,
-            height: options.height,
+            size: options.size || 5,
+            height: options.height || 1,
             curveSegments: 12,
             bevelEnabled: false
         });
@@ -54,52 +55,37 @@ export class TextManager {
             metalness: 0.1
         });
 
-        this.mainTextMesh = new THREE.Mesh(geometry, material);
-        this.mainTextMesh.position.set(0, options.positionY, options.mode === 'emboss' ? options.height : -options.height * 0.5);
-        this.mainTextMesh.name = 'mainText';
+        const mesh = new THREE.Mesh(geometry, material);
 
-        parentGroup.add(this.mainTextMesh);
+        // Position logic
+        const zPos = options.mode === 'emboss' ? options.height : -options.height * 0.5;
+        mesh.position.set(options.position?.x || 0, options.position?.y || 0, zPos);
+
+        mesh.name = id;
+        mesh.userData = { isEditableText: true, id: id }; // Marker for raycasting/interaction
+
+        this.texts.set(id, mesh);
+        parentGroup.add(mesh);
     }
 
-    async updateSecondaryText(text, options, parentGroup) {
-        if (!this.font) await this.loadFont();
-
-        if (this.secondaryTextMesh) {
-            parentGroup.remove(this.secondaryTextMesh);
-            this.secondaryTextMesh.geometry.dispose();
-            this.secondaryTextMesh.material.dispose();
+    removeText(id, parentGroup) {
+        const mesh = this.texts.get(id);
+        if (mesh) {
+            parentGroup.remove(mesh);
+            mesh.geometry.dispose();
+            mesh.material.dispose();
+            this.texts.delete(id);
         }
-
-        if (!text) return;
-
-        const geometry = new TextGeometry(text, {
-            font: this.font,
-            size: options.size,
-            height: options.height,
-            curveSegments: 12,
-            bevelEnabled: false
-        });
-
-        geometry.computeBoundingBox();
-        geometry.center();
-
-        const material = new THREE.MeshStandardMaterial({
-            color: options.color || 0x6b5f7a,
-            roughness: 0.3,
-            metalness: 0.1
-        });
-
-        this.secondaryTextMesh = new THREE.Mesh(geometry, material);
-        this.secondaryTextMesh.position.set(0, options.positionY, options.mode === 'emboss' ? options.height : -options.height * 0.5);
-        this.secondaryTextMesh.name = 'secondaryText';
-
-        parentGroup.add(this.secondaryTextMesh);
     }
 
-    updateColor(color, isMain = true) {
-        const mesh = isMain ? this.mainTextMesh : this.secondaryTextMesh;
+    updateColor(id, color) {
+        const mesh = this.texts.get(id);
         if (mesh) {
             mesh.material.color.setHex(color);
         }
+    }
+
+    getAllMeshes() {
+        return Array.from(this.texts.values());
     }
 }
