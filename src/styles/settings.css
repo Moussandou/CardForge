@@ -152,12 +152,13 @@
 
 .color-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(5, 32px);
+    gap: 10px;
 }
 
 .color-btn {
-    aspect-ratio: 1;
+    width: 32px;
+    height: 32px;
     border-radius: var(--radius-md);
     cursor: pointer;
     border: 2px solid transparent;
@@ -165,7 +166,7 @@
 }
 
 .color-btn:hover {
-    transform: scale(1.1);
+    transform: scale(1.15);
 }
 
 .color-btn.active {

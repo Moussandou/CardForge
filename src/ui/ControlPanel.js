@@ -1,7 +1,4 @@
 import { gsap } from 'gsap';
-import { Draggable } from 'gsap/Draggable';
-
-gsap.registerPlugin(Draggable);
 
 /**
  * Panneau de paramètres avec sections animées via GSAP
@@ -34,6 +31,7 @@ export class ControlPanel {
 
     this.render();
     this.attachEvents();
+    this.showPanelSection(this.activePanel, false);
     this.animateIn();
   }
 
@@ -276,28 +274,36 @@ export class ControlPanel {
     });
   }
 
-  showPanelSection(panel) {
+  showPanelSection(panel, animate = true) {
     const sections = this.container.querySelectorAll('.settings-section');
 
-    sections.forEach(section => {
-      gsap.to(section, { opacity: 0, y: -10, duration: 0.15 });
-    });
+    if (animate) {
+      sections.forEach(section => {
+        gsap.to(section, { opacity: 0, y: -10, duration: 0.15 });
+      });
+    }
 
-    setTimeout(() => {
+    const applyVisibility = () => {
       sections.forEach(section => {
         const sectionType = section.dataset.section;
         let show = false;
 
-        if (panel === 'card') show = ['dimensions', 'frame', 'card-color'].includes(sectionType);
+        if (panel === 'card') show = ['dimensions', 'frame'].includes(sectionType);
         else if (panel === 'text') show = ['text', 'mode'].includes(sectionType);
         else if (panel === 'style') show = ['card-color', 'frame'].includes(sectionType);
 
         section.style.display = show ? 'block' : 'none';
-        if (show) {
+        if (show && animate) {
           gsap.fromTo(section, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3 });
         }
       });
-    }, 150);
+    };
+
+    if (animate) {
+      setTimeout(applyVisibility, 150);
+    } else {
+      applyVisibility();
+    }
   }
 
   handleChange() {
