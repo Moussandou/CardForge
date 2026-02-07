@@ -14,7 +14,6 @@ class CardForgeApp {
 
     async init() {
         const canvas = document.getElementById('canvas');
-        const controlPanelContainer = document.getElementById('control-panel');
         const settingsContainer = document.getElementById('settings-panel');
 
         this.scene = new Scene(canvas);
@@ -25,10 +24,10 @@ class CardForgeApp {
         this.scene.add(this.card.getGroup());
 
         this.controlPanel = new ControlPanel(
-            controlPanelContainer,
             settingsContainer,
             (params) => this.handleUpdate(params),
-            (format) => this.handleExport(format)
+            (format) => this.handleExport(format),
+            this.scene
         );
 
         const initialParams = this.controlPanel.getParams();
@@ -41,7 +40,8 @@ class CardForgeApp {
             height: params.height,
             depth: params.depth,
             frameEnabled: params.frameEnabled,
-            frameThickness: params.frameThickness
+            frameThickness: params.frameThickness,
+            color: params.cardColor
         });
 
         await this.textManager.updateMainText(
@@ -50,7 +50,8 @@ class CardForgeApp {
                 size: params.mainTextSize,
                 height: params.depth * 0.5,
                 positionY: params.mainTextPositionY,
-                mode: params.mainTextMode
+                mode: params.mainTextMode,
+                color: params.mainTextColor
             },
             this.card.getGroup()
         );
@@ -61,7 +62,8 @@ class CardForgeApp {
                 size: params.secondaryTextSize,
                 height: params.depth * 0.4,
                 positionY: params.secondaryTextPositionY,
-                mode: params.mainTextMode
+                mode: params.mainTextMode,
+                color: params.secondaryTextColor
             },
             this.card.getGroup()
         );

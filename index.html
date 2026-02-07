@@ -4,69 +4,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CardForge - Créateur de cartes 3D</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>CardForge</title>
   <link rel="stylesheet" href="/src/styles/main.css">
 </head>
 
 <body>
   <div class="app">
-    <!-- Sidebar icônes -->
-    <nav class="icon-sidebar">
-      <button class="icon-btn active" title="Carte">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="18" height="18" rx="2" />
-        </svg>
-      </button>
-      <button class="icon-btn" title="Texte">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 7V4h16v3M9 20h6M12 4v16" />
-        </svg>
-      </button>
-      <button class="icon-btn" title="Formes">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="9" />
-        </svg>
-      </button>
-      <div class="sidebar-divider"></div>
-      <button class="icon-btn" title="Paramètres">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="3" />
-          <path
-            d="M12 1v4m0 14v4M4.22 4.22l2.83 2.83m9.9 9.9l2.83 2.83M1 12h4m14 0h4M4.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83" />
-        </svg>
-      </button>
-    </nav>
+    <aside class="settings-panel" id="settings-panel"></aside>
 
-    <!-- Panneau de contrôle -->
-    <aside class="control-panel" id="control-panel"></aside>
-
-    <!-- Preview 3D -->
     <main class="preview-container">
       <div class="preview-toolbar">
-        <div class="toolbar-left">
-          <button class="toolbar-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 12h18M3 6h18M3 18h18" />
-            </svg>
-            Grille
-          </button>
-          <button class="toolbar-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            100%
-          </button>
+        <div class="toolbar-group">
+          <div class="zoom-controls">
+            <button class="zoom-btn" id="zoomOutBtn">-</button>
+            <span class="zoom-value" id="zoomValue">100%</span>
+            <button class="zoom-btn" id="zoomInBtn">+</button>
+          </div>
         </div>
-        <div class="toolbar-right">
-          <button class="toolbar-btn">Réinitialiser vue</button>
-          <button class="toolbar-btn primary" id="btn-export-stl">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <div class="toolbar-group">
+          <button class="toolbar-btn" id="resetCameraBtn">Reset vue</button>
+          <div class="toolbar-divider"></div>
+          <button class="toolbar-btn primary" id="quickExportBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
             </svg>
-            Exporter STL
+            Export STL
           </button>
         </div>
       </div>
@@ -75,8 +37,49 @@
       </div>
     </main>
 
-    <!-- Panneau paramètres droite -->
-    <aside class="settings-panel" id="settings-panel"></aside>
+    <nav class="icon-sidebar">
+      <div class="sidebar-logo">CF</div>
+
+      <button class="icon-btn active" data-panel="card" title="Carte">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="3" />
+        </svg>
+        <span class="icon-btn-tooltip">Carte</span>
+      </button>
+
+      <button class="icon-btn" data-panel="text" title="Texte">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 7V4h16v3M9 20h6M12 4v16" />
+        </svg>
+        <span class="icon-btn-tooltip">Texte</span>
+      </button>
+
+      <button class="icon-btn" data-panel="style" title="Style">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 3v9l4 4" />
+        </svg>
+        <span class="icon-btn-tooltip">Style</span>
+      </button>
+
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-spacer"></div>
+
+      <button class="icon-btn" id="toggleGridBtn" title="Grille">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18" />
+        </svg>
+        <span class="icon-btn-tooltip">Grille</span>
+      </button>
+
+      <button class="icon-btn" id="resetViewBtn" title="Reset">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8" />
+          <path d="M3 3v5h5" />
+        </svg>
+        <span class="icon-btn-tooltip">Reset</span>
+      </button>
+    </nav>
   </div>
   <script type="module" src="/src/main.js"></script>
 </body>

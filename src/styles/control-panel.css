@@ -8,14 +8,15 @@
 }
 
 .panel-header {
-    padding: 16px 20px;
+    padding: 20px;
     border-bottom: 1px solid var(--color-border);
+    background: linear-gradient(135deg, var(--color-accent-pale) 0%, var(--color-sidebar) 100%);
 }
 
 .panel-header h1 {
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 600;
-    color: var(--color-text);
+    color: var(--color-accent);
 }
 
 .panel-header p {
@@ -35,7 +36,7 @@
     letter-spacing: 0.05em;
     color: var(--color-text-dim);
     margin-bottom: 12px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .tag-list {
@@ -58,6 +59,7 @@
 .tag:hover {
     border-color: var(--color-accent);
     color: var(--color-accent);
+    background: var(--color-accent-pale);
 }
 
 .tag.active {

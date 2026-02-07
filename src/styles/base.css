@@ -7,29 +7,81 @@
 }
 
 :root {
-    --color-bg: #f5f5f5;
+    --color-bg: #f8f7fc;
     --color-sidebar: #ffffff;
     --color-panel: #ffffff;
-    --color-border: #e5e5e5;
-    --color-text: #1a1a1a;
-    --color-text-dim: #666666;
-    --color-accent: #8b1538;
-    --color-accent-light: #a91d47;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --radius-sm: 6px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
+    --color-border: #e8e4f0;
+    --color-text: #2d2640;
+    --color-text-dim: #6b5f7a;
+    --color-accent: #7c5cbf;
+    --color-accent-light: #9b7ee0;
+    --color-accent-pale: #e8e0f7;
+    --color-success: #5cb87a;
+    --color-warning: #e8a84c;
+    --shadow-sm: 0 1px 3px rgba(124, 92, 191, 0.08);
+    --shadow-md: 0 4px 12px rgba(124, 92, 191, 0.12);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --transition: 0.2s ease;
+}
+
+@font-face {
+    font-family: 'Geist';
+    src: url('https://cdn.jsdelivr.net/npm/geist@1.2.0/dist/fonts/geist-sans/Geist-Regular.woff2') format('woff2');
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: 'Geist';
+    src: url('https://cdn.jsdelivr.net/npm/geist@1.2.0/dist/fonts/geist-sans/Geist-Medium.woff2') format('woff2');
+    font-weight: 500;
+}
+
+@font-face {
+    font-family: 'Geist';
+    src: url('https://cdn.jsdelivr.net/npm/geist@1.2.0/dist/fonts/geist-sans/Geist-SemiBold.woff2') format('woff2');
+    font-weight: 600;
 }
 
 body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Geist', system-ui, -apple-system, sans-serif;
     background: var(--color-bg);
     color: var(--color-text);
     min-height: 100vh;
 }
 
 .app {
-    display: flex;
+    display: grid;
+    grid-template-columns: 280px 1fr 60px;
     height: 100vh;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-in {
+    animation: fadeIn 0.3s ease forwards;
 }

@@ -1,8 +1,8 @@
 .preview-container {
-    flex: 1;
     display: flex;
     flex-direction: column;
     background: var(--color-bg);
+    position: relative;
 }
 
 .preview-toolbar {
@@ -14,28 +14,38 @@
     border-bottom: 1px solid var(--color-border);
 }
 
-.toolbar-left,
-.toolbar-right {
+.toolbar-group {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
 .toolbar-btn {
-    padding: 8px 12px;
+    padding: 8px 14px;
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     background: white;
     color: var(--color-text-dim);
-    font-size: 0.8rem;
+    font-size: 13px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 6px;
-    transition: all 0.2s;
+    transition: all var(--transition);
+}
+
+.toolbar-btn svg {
+    width: 14px;
+    height: 14px;
 }
 
 .toolbar-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.toolbar-btn.active {
+    background: var(--color-accent-pale);
     border-color: var(--color-accent);
     color: var(--color-accent);
 }
@@ -48,6 +58,49 @@
 
 .toolbar-btn.primary:hover {
     background: var(--color-accent-light);
+    transform: translateY(-1px);
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--color-border);
+    border-radius: 1px;
+}
+
+.zoom-controls {
+    display: flex;
+    align-items: center;
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+    padding: 4px;
+}
+
+.zoom-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    transition: all var(--transition);
+}
+
+.zoom-btn:hover {
+    background: white;
+    color: var(--color-accent);
+}
+
+.zoom-value {
+    font-size: 12px;
+    color: var(--color-text);
+    min-width: 40px;
+    text-align: center;
 }
 
 .canvas-wrapper {
@@ -55,14 +108,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 40px;
     position: relative;
+    overflow: hidden;
+    margin: 16px;
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
 }
 
 #canvas {
     display: block;
     width: 100%;
     height: 100%;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
+    border-radius: var(--radius-xl);
 }

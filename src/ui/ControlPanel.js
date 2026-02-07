@@ -1,12 +1,18 @@
+import { gsap } from 'gsap';
+import { Draggable } from 'gsap/Draggable';
+
+gsap.registerPlugin(Draggable);
+
 /**
- * Panneau de contrôle pour les paramètres de la carte (colonne gauche)
+ * Panneau de paramètres avec sections animées via GSAP
  */
 export class ControlPanel {
-  constructor(container, settingsContainer, onUpdate, onExport) {
+  constructor(container, onUpdate, onExport, sceneRef) {
     this.container = container;
-    this.settingsContainer = settingsContainer;
     this.onUpdate = onUpdate;
     this.onExport = onExport;
+    this.sceneRef = sceneRef;
+    this.activePanel = 'card';
 
     this.params = {
       width: 63,
@@ -16,221 +22,294 @@ export class ControlPanel {
       mainTextSize: 8,
       mainTextPositionY: 10,
       mainTextMode: 'emboss',
+      mainTextColor: 0x2d2640,
       secondaryText: '',
       secondaryTextSize: 5,
       secondaryTextPositionY: -15,
+      secondaryTextColor: 0x6b5f7a,
       frameEnabled: false,
-      frameThickness: 2
+      frameThickness: 2,
+      cardColor: 0xffffff
     };
 
     this.render();
-    this.renderSettings();
     this.attachEvents();
+    this.animateIn();
   }
 
   render() {
     this.container.innerHTML = `
-      <div class="panel-header">
-        <h1>CardForge</h1>
-        <p>Créateur de cartes 3D pour impression</p>
+      <div class="settings-header">
+        <h2>Parametres</h2>
       </div>
 
-      <div class="panel-section">
-        <h2>Catégories</h2>
-        <div class="tag-list">
-          <button class="tag active">Standard</button>
-          <button class="tag">Business</button>
-          <button class="tag">Gaming</button>
-          <button class="tag">Custom</button>
+      <div class="settings-section" data-section="dimensions">
+        <div class="section-title">Dimensions</div>
+        <div class="control-row">
+          <span class="control-label">Largeur</span>
+          <input type="number" class="control-input" id="width" value="${this.params.width}" min="20" max="200">
+        </div>
+        <div class="control-row">
+          <span class="control-label">Hauteur</span>
+          <input type="number" class="control-input" id="height" value="${this.params.height}" min="20" max="200">
+        </div>
+        <div class="control-row">
+          <span class="control-label">Epaisseur</span>
+          <input type="number" class="control-input" id="depth" value="${this.params.depth}" min="0.5" max="10" step="0.5">
         </div>
       </div>
 
-      <div class="panel-section">
-        <h2>Dimensions (mm)</h2>
-        <div class="dimension-grid">
-          <div class="control-group">
-            <label for="width">Largeur</label>
-            <input type="number" id="width" value="${this.params.width}" min="20" max="200" step="1">
+      <div class="settings-section" data-section="text">
+        <div class="section-title">Texte principal</div>
+        <div class="control-row">
+          <span class="control-label">Contenu</span>
+          <input type="text" class="control-input" id="mainText" value="${this.params.mainText}" style="width:120px;text-align:left">
+        </div>
+        <div class="control-row">
+          <span class="control-label">Taille</span>
+          <input type="number" class="control-input" id="mainTextSize" value="${this.params.mainTextSize}" min="3" max="20">
+        </div>
+        <div class="control-row">
+          <span class="control-label">Position Y</span>
+          <input type="number" class="control-input" id="mainTextPositionY" value="${this.params.mainTextPositionY}" min="-50" max="50">
+        </div>
+        <div class="control-row">
+          <span class="control-label">Couleur</span>
+          <div class="color-grid" id="textColorGrid">
+            <div class="color-btn active" style="background:#2d2640" data-color="0x2d2640"></div>
+            <div class="color-btn" style="background:#6b5f7a" data-color="0x6b5f7a"></div>
+            <div class="color-btn" style="background:#7c5cbf" data-color="0x7c5cbf"></div>
+            <div class="color-btn" style="background:#ffffff" data-color="0xffffff"></div>
+            <div class="color-btn" style="background:#e8a84c" data-color="0xe8a84c"></div>
           </div>
-          <div class="control-group">
-            <label for="height">Hauteur</label>
-            <input type="number" id="height" value="${this.params.height}" min="20" max="200" step="1">
-          </div>
-          <div class="control-group">
-            <label for="depth">Épaisseur</label>
-            <input type="number" id="depth" value="${this.params.depth}" min="0.5" max="10" step="0.5">
-          </div>
         </div>
       </div>
 
-      <div class="panel-section">
-        <h2>Texte Principal</h2>
-        <div class="control-group">
-          <label for="mainText">Nom</label>
-          <input type="text" id="mainText" value="${this.params.mainText}" maxlength="20" placeholder="Entrez votre texte">
-        </div>
-        <div class="control-group">
-          <label for="mainTextSize">Taille</label>
-          <input type="number" id="mainTextSize" value="${this.params.mainTextSize}" min="3" max="20" step="1">
-        </div>
-        <div class="control-group">
-          <label for="mainTextPositionY">Position Y</label>
-          <input type="number" id="mainTextPositionY" value="${this.params.mainTextPositionY}" min="-50" max="50" step="1">
+      <div class="settings-section" data-section="mode">
+        <div class="section-title">Mode</div>
+        <div class="mode-switch">
+          <button class="mode-btn active" data-mode="emboss">Relief</button>
+          <button class="mode-btn" data-mode="engrave">Grave</button>
         </div>
       </div>
 
-      <div class="panel-section">
-        <h2>Texte Secondaire</h2>
-        <div class="control-group">
-          <label for="secondaryText">Sous-titre</label>
-          <input type="text" id="secondaryText" value="${this.params.secondaryText}" maxlength="30" placeholder="Optionnel">
+      <div class="settings-section" data-section="card-color">
+        <div class="section-title">Couleur carte</div>
+        <div class="color-grid" id="cardColorGrid">
+          <div class="color-btn active" style="background:#ffffff" data-color="0xffffff"></div>
+          <div class="color-btn" style="background:#f5f0ff" data-color="0xf5f0ff"></div>
+          <div class="color-btn" style="background:#e8e0f7" data-color="0xe8e0f7"></div>
+          <div class="color-btn" style="background:#d4c4e8" data-color="0xd4c4e8"></div>
+          <div class="color-btn" style="background:#b8a0d9" data-color="0xb8a0d9"></div>
+          <div class="color-btn" style="background:#2d2640" data-color="0x2d2640"></div>
+          <div class="color-btn" style="background:#4a4458" data-color="0x4a4458"></div>
+          <div class="color-btn" style="background:#a8d5ba" data-color="0xa8d5ba"></div>
+          <div class="color-btn" style="background:#f4d9a0" data-color="0xf4d9a0"></div>
+          <div class="color-btn" style="background:#f0b8c4" data-color="0xf0b8c4"></div>
         </div>
-        <div class="control-group">
-          <label for="secondaryTextSize">Taille</label>
-          <input type="number" id="secondaryTextSize" value="${this.params.secondaryTextSize}" min="2" max="15" step="1">
+      </div>
+
+      <div class="settings-section" data-section="frame">
+        <div class="section-title">Cadre</div>
+        <div class="toggle-row">
+          <span class="control-label">Activer</span>
+          <div class="toggle-switch ${this.params.frameEnabled ? 'active' : ''}" id="frameToggle"></div>
         </div>
-        <div class="control-group">
-          <label for="secondaryTextPositionY">Position Y</label>
-          <input type="number" id="secondaryTextPositionY" value="${this.params.secondaryTextPositionY}" min="-50" max="50" step="1">
+        <div class="slider-control" id="frameSliderGroup" style="opacity:${this.params.frameEnabled ? 1 : 0.5}">
+          <div class="slider-header">
+            <span>Epaisseur</span>
+            <span id="frameThicknessValue">${this.params.frameThickness}mm</span>
+          </div>
+          <input type="range" class="slider-track" id="frameThickness" value="${this.params.frameThickness}" min="1" max="10" step="0.5">
         </div>
+      </div>
+
+      <div class="export-group">
+        <button class="btn-action primary" id="exportSTL">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          Telecharger STL
+        </button>
+        <button class="btn-action secondary" id="exportOBJ">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          Telecharger OBJ
+        </button>
       </div>
     `;
   }
 
-  renderSettings() {
-    this.settingsContainer.innerHTML = `
-      <div class="settings-section">
-        <h3>Mode du texte <span class="chevron">▼</span></h3>
-        <div class="mode-tabs">
-          <button class="mode-tab ${this.params.mainTextMode === 'emboss' ? 'active' : ''}" data-mode="emboss">Relief</button>
-          <button class="mode-tab ${this.params.mainTextMode === 'engrave' ? 'active' : ''}" data-mode="engrave">Gravé</button>
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3>Cadre <span class="chevron">▼</span></h3>
-        <div class="toggle-group">
-          <label class="toggle ${this.params.frameEnabled ? 'active' : ''}" id="frameToggle">
-            <input type="checkbox" id="frameEnabled" ${this.params.frameEnabled ? 'checked' : ''}>
-          </label>
-          <span class="toggle-label">Activer le cadre</span>
-        </div>
-        <div class="control-group" style="margin-top: 12px;">
-          <label for="frameThickness">Épaisseur</label>
-          <input type="number" id="frameThickness" value="${this.params.frameThickness}" min="1" max="10" step="0.5">
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3>Matériau</h3>
-        <div class="color-palette">
-          <div class="color-swatch active" style="background: #ffffff" data-color="0xffffff"></div>
-          <div class="color-swatch" style="background: #1a1a2e" data-color="0x1a1a2e"></div>
-          <div class="color-swatch" style="background: #8b1538" data-color="0x8b1538"></div>
-          <div class="color-swatch" style="background: #0f4c75" data-color="0x0f4c75"></div>
-          <div class="color-swatch" style="background: #3d5a80" data-color="0x3d5a80"></div>
-          <div class="color-swatch" style="background: #2d6a4f" data-color="0x2d6a4f"></div>
-          <div class="color-swatch" style="background: #d4a373" data-color="0xd4a373"></div>
-          <div class="color-swatch" style="background: #9b5de5" data-color="0x9b5de5"></div>
-          <div class="color-swatch" style="background: #f72585" data-color="0xf72585"></div>
-          <div class="color-swatch" style="background: #4361ee" data-color="0x4361ee"></div>
-        </div>
-      </div>
-
-      <div class="export-section">
-        <div class="export-buttons">
-          <button class="btn-export primary" id="exportSTL">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-            </svg>
-            Export STL
-          </button>
-          <button class="btn-export secondary" id="exportOBJ">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-            </svg>
-            Export OBJ
-          </button>
-        </div>
-      </div>
-    `;
+  animateIn() {
+    const sections = this.container.querySelectorAll('.settings-section');
+    gsap.from(sections, {
+      opacity: 0,
+      y: 20,
+      duration: 0.4,
+      stagger: 0.08,
+      ease: 'power2.out'
+    });
   }
 
   attachEvents() {
-    const inputIds = [
-      'width', 'height', 'depth',
-      'mainText', 'mainTextSize', 'mainTextPositionY',
-      'secondaryText', 'secondaryTextSize', 'secondaryTextPositionY',
-      'frameThickness'
-    ];
-
-    inputIds.forEach(id => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.addEventListener('input', () => this.handleChange());
-      }
+    const inputs = ['width', 'height', 'depth', 'mainText', 'mainTextSize', 'mainTextPositionY'];
+    inputs.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', () => this.handleChange());
     });
 
-    // Mode tabs
-    document.querySelectorAll('.mode-tab').forEach(tab => {
-      tab.addEventListener('click', (e) => {
-        document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+    // Mode buttons
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
         this.params.mainTextMode = e.target.dataset.mode;
+        gsap.from(e.target, { scale: 0.9, duration: 0.2 });
         this.onUpdate(this.params);
       });
     });
 
     // Frame toggle
     const frameToggle = document.getElementById('frameToggle');
-    const frameCheckbox = document.getElementById('frameEnabled');
-    if (frameToggle && frameCheckbox) {
-      frameToggle.addEventListener('click', () => {
-        frameCheckbox.checked = !frameCheckbox.checked;
-        frameToggle.classList.toggle('active', frameCheckbox.checked);
-        this.handleChange();
+    const frameSliderGroup = document.getElementById('frameSliderGroup');
+    frameToggle?.addEventListener('click', () => {
+      this.params.frameEnabled = !this.params.frameEnabled;
+      frameToggle.classList.toggle('active', this.params.frameEnabled);
+      gsap.to(frameSliderGroup, { opacity: this.params.frameEnabled ? 1 : 0.5, duration: 0.2 });
+      this.onUpdate(this.params);
+    });
+
+    // Frame thickness slider
+    const frameThickness = document.getElementById('frameThickness');
+    const frameThicknessValue = document.getElementById('frameThicknessValue');
+    frameThickness?.addEventListener('input', (e) => {
+      this.params.frameThickness = parseFloat(e.target.value);
+      frameThicknessValue.textContent = `${this.params.frameThickness}mm`;
+      this.onUpdate(this.params);
+    });
+
+    // Text color grid
+    document.querySelectorAll('#textColorGrid .color-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('#textColorGrid .color-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        this.params.mainTextColor = parseInt(e.target.dataset.color);
+        gsap.from(e.target, { scale: 1.2, duration: 0.2 });
+        this.onUpdate(this.params);
       });
-    }
+    });
+
+    // Card color grid
+    document.querySelectorAll('#cardColorGrid .color-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('#cardColorGrid .color-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        this.params.cardColor = parseInt(e.target.dataset.color);
+        gsap.from(e.target, { scale: 1.2, duration: 0.2 });
+        this.onUpdate(this.params);
+      });
+    });
 
     // Export buttons
     document.getElementById('exportSTL')?.addEventListener('click', () => this.onExport('stl'));
     document.getElementById('exportOBJ')?.addEventListener('click', () => this.onExport('obj'));
-    document.getElementById('btn-export-stl')?.addEventListener('click', () => this.onExport('stl'));
+    document.getElementById('quickExportBtn')?.addEventListener('click', () => this.onExport('stl'));
 
-    // Color swatches
-    document.querySelectorAll('.color-swatch').forEach(swatch => {
-      swatch.addEventListener('click', (e) => {
-        document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-        e.target.classList.add('active');
-      });
+    // Toolbar controls
+    this.attachToolbarEvents();
+    this.attachSidebarEvents();
+  }
+
+  attachToolbarEvents() {
+    const zoomValue = document.getElementById('zoomValue');
+    let currentZoom = 100;
+
+    document.getElementById('zoomInBtn')?.addEventListener('click', () => {
+      if (this.sceneRef && currentZoom < 200) {
+        currentZoom += 25;
+        zoomValue.textContent = `${currentZoom}%`;
+        this.sceneRef.setZoom(currentZoom / 100);
+      }
     });
 
-    // Tags
-    document.querySelectorAll('.tag').forEach(tag => {
-      tag.addEventListener('click', (e) => {
-        document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
-        e.target.classList.add('active');
+    document.getElementById('zoomOutBtn')?.addEventListener('click', () => {
+      if (this.sceneRef && currentZoom > 50) {
+        currentZoom -= 25;
+        zoomValue.textContent = `${currentZoom}%`;
+        this.sceneRef.setZoom(currentZoom / 100);
+      }
+    });
+
+    document.getElementById('resetCameraBtn')?.addEventListener('click', () => {
+      if (this.sceneRef) {
+        currentZoom = 100;
+        zoomValue.textContent = '100%';
+        this.sceneRef.resetCamera();
+      }
+    });
+
+    document.getElementById('resetViewBtn')?.addEventListener('click', () => {
+      if (this.sceneRef) {
+        currentZoom = 100;
+        if (zoomValue) zoomValue.textContent = '100%';
+        this.sceneRef.resetCamera();
+      }
+    });
+
+    const gridBtn = document.getElementById('toggleGridBtn');
+    gridBtn?.addEventListener('click', () => {
+      gridBtn.classList.toggle('active');
+      if (this.sceneRef) this.sceneRef.toggleGrid();
+    });
+  }
+
+  attachSidebarEvents() {
+    document.querySelectorAll('.icon-btn[data-panel]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.icon-btn[data-panel]').forEach(b => b.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        this.activePanel = e.currentTarget.dataset.panel;
+        this.showPanelSection(this.activePanel);
       });
     });
   }
 
+  showPanelSection(panel) {
+    const sections = this.container.querySelectorAll('.settings-section');
+
+    sections.forEach(section => {
+      gsap.to(section, { opacity: 0, y: -10, duration: 0.15 });
+    });
+
+    setTimeout(() => {
+      sections.forEach(section => {
+        const sectionType = section.dataset.section;
+        let show = false;
+
+        if (panel === 'card') show = ['dimensions', 'frame', 'card-color'].includes(sectionType);
+        else if (panel === 'text') show = ['text', 'mode'].includes(sectionType);
+        else if (panel === 'style') show = ['card-color', 'frame'].includes(sectionType);
+
+        section.style.display = show ? 'block' : 'none';
+        if (show) {
+          gsap.fromTo(section, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3 });
+        }
+      });
+    }, 150);
+  }
+
   handleChange() {
     this.params = {
+      ...this.params,
       width: parseFloat(document.getElementById('width').value),
       height: parseFloat(document.getElementById('height').value),
       depth: parseFloat(document.getElementById('depth').value),
       mainText: document.getElementById('mainText').value,
       mainTextSize: parseFloat(document.getElementById('mainTextSize').value),
-      mainTextPositionY: parseFloat(document.getElementById('mainTextPositionY').value),
-      mainTextMode: this.params.mainTextMode,
-      secondaryText: document.getElementById('secondaryText').value,
-      secondaryTextSize: parseFloat(document.getElementById('secondaryTextSize').value),
-      secondaryTextPositionY: parseFloat(document.getElementById('secondaryTextPositionY').value),
-      frameEnabled: document.getElementById('frameEnabled').checked,
-      frameThickness: parseFloat(document.getElementById('frameThickness').value)
+      mainTextPositionY: parseFloat(document.getElementById('mainTextPositionY').value)
     };
-
     this.onUpdate(this.params);
   }
 
