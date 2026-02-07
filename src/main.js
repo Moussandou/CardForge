@@ -42,7 +42,20 @@ class CardForgeApp {
         // Callback for selection
         this.interactionManager.onSelect((object) => {
             console.log('Selected:', object.name);
-            // Future: update UI with selected object properties
+            // Auto-switch to text panel when a text is selected
+            if (object.userData.isEditableText || (object.userData.isHitBox && object.userData.parentId)) {
+                this.controlPanel.setActivePanel('text');
+            }
+        });
+
+        // Initialize Drag Handler
+        this.interactionManager.onDrag((object) => {
+            if (object.name === 'fullName') {
+                this.controlPanel.updateParam('mainTextPositionY', object.position.y);
+            } else if (object.name === 'jobTitle') {
+                this.controlPanel.updateParam('secondaryTextPositionY', object.position.y);
+            }
+            // For other fields, we simply trust the mesh position in handleUpdate
         });
 
         const initialParams = this.controlPanel.getParams();
@@ -64,43 +77,53 @@ class CardForgeApp {
             height: params.depth * 0.5,
         };
 
-        // 1. Full Name (Main)
+        // Helper to get current position if it exists (for non-param fields)
+        const getExistingPos = (id, defaultPos) => {
+            const mesh = this.textManager.texts.get(id);
+            if (mesh) return { x: mesh.position.x, y: mesh.position.y };
+            return defaultPos;
+        };
+
+        // 1. Full Name (Driven by param, but param is updated by drag)
         await this.textManager.updateText('fullName', params.fullName || 'John Doe', {
             ...commonOptions,
             size: params.mainTextSize || 6,
-            position: { x: 0, y: params.mainTextPositionY || 10 },
+            position: { x: getExistingPos('fullName', { x: 0 }).x, y: params.mainTextPositionY || 10 },
             color: params.mainTextColor || 0x2d2640
         }, this.card.getGroup());
 
-        // 2. Job Title (Secondary)
+        // 2. Job Title
         await this.textManager.updateText('jobTitle', params.jobTitle || 'CEO & Founder', {
             ...commonOptions,
             size: params.secondaryTextSize || 4,
-            position: { x: 0, y: params.secondaryTextPositionY || -5 },
+            position: { x: getExistingPos('jobTitle', { x: 0 }).x, y: params.secondaryTextPositionY || -5 },
             color: params.secondaryTextColor || 0x6b5f7a
         }, this.card.getGroup());
 
-        // 3. Contact Info (Details) - Phone
+        // 3. Contact Info (Persist position across updates)
+        const phonePos = getExistingPos('phone', { x: -20, y: -15 });
         await this.textManager.updateText('phone', params.phone || '', {
             ...commonOptions,
             size: 3,
-            position: { x: -20, y: -15 }, // Example position
+            position: phonePos,
             color: params.secondaryTextColor || 0x6b5f7a
         }, this.card.getGroup());
 
         // 4. Email
+        const emailPos = getExistingPos('email', { x: -20, y: -22 });
         await this.textManager.updateText('email', params.email || '', {
             ...commonOptions,
             size: 3,
-            position: { x: -20, y: -22 },
+            position: emailPos,
             color: params.secondaryTextColor || 0x6b5f7a
         }, this.card.getGroup());
 
         // 5. Website
+        const webPos = getExistingPos('website', { x: -20, y: -29 });
         await this.textManager.updateText('website', params.website || '', {
             ...commonOptions,
             size: 3,
-            position: { x: -20, y: -29 },
+            position: webPos,
             color: params.secondaryTextColor || 0x6b5f7a
         }, this.card.getGroup());
 

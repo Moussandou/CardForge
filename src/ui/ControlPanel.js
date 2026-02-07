@@ -319,7 +319,17 @@ export class ControlPanel {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('#textColorGrid .color-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
-        this.params.mainTextColor = parseInt(e.target.dataset.color);
+
+        const color = parseInt(e.target.dataset.color);
+
+        // If a specific text field is selected, update its color
+        if (this.selectedTextId) {
+          this.updateParam(`${this.selectedTextId}Color`, color);
+        } else {
+          // Default to main text if nothing selected (or update all?)
+          this.updateParam('mainTextColor', color);
+        }
+
         gsap.from(e.target, { scale: 1.2, duration: 0.2 });
         this.onUpdate(this.params);
       });
@@ -352,16 +362,22 @@ export class ControlPanel {
         this.params.width = 85;
         this.params.height = 55;
         this.params.depth = 2;
+        this.params.mainTextSize = 6;
+        this.params.mainTextPositionY = 10;
         break;
       case 'minimal':
         this.params.width = 85;
         this.params.height = 55;
         this.params.depth = 1.5;
+        this.params.mainTextSize = 5; // Smaller text
+        this.params.mainTextPositionY = 5;
         break;
       case 'credit-card':
         this.params.width = 85.6;
         this.params.height = 54;
         this.params.depth = 0.8;
+        this.params.mainTextSize = 5.5;
+        this.params.mainTextPositionY = 8;
         break;
     }
     document.getElementById('width').value = this.params.width;
@@ -465,6 +481,15 @@ export class ControlPanel {
     }
   }
 
+  setActivePanel(panel) {
+    this.activePanel = panel;
+    // Update sidebar buttons
+    document.querySelectorAll('.icon-btn[data-panel]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.panel === panel);
+    });
+    this.showPanelSection(panel);
+  }
+
   handleChange() {
     this.params = {
       ...this.params,
@@ -483,5 +508,12 @@ export class ControlPanel {
 
   getParams() {
     return this.params;
+  }
+
+  updateParam(key, value) {
+    this.params[key] = value;
+    // Update UI input if exists
+    const input = document.getElementById(key);
+    if (input) input.value = value;
   }
 }

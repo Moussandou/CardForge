@@ -52,11 +52,18 @@ export class InteractionManager {
 
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
-        const intersects = this.raycaster.intersectObjects(this.draggableObjects, false);
+        // Recursive = true to hit children (hitboxes)
+        const intersects = this.raycaster.intersectObjects(this.draggableObjects, true);
 
         if (intersects.length > 0) {
             this.orbitControls.enabled = false;
-            this.selectedObject = intersects[0].object;
+            // Get the root parent (the text mesh), not the hitbox
+            let target = intersects[0].object;
+            if (target.userData.isHitBox) {
+                target = target.parent;
+            }
+
+            this.selectedObject = target;
             this.isDragging = true;
 
             if (this.raycaster.ray.intersectPlane(this.plane, this.intersection)) {
@@ -99,8 +106,8 @@ export class InteractionManager {
         this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
         this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
         this.raycaster.setFromCamera(this.mouse, this.camera);
-        const intersects = this.raycaster.intersectObjects(this.draggableObjects, false);
-        this.renderer.domElement.style.cursor = intersects.length > 0 ? 'pointer' : 'auto';
+        const intersects = this.raycaster.intersectObjects(this.draggableObjects, true);
+        this.renderer.domElement.style.cursor = intersects.length > 0 ? 'move' : 'auto';
     }
 
     onPointerUp(event) {

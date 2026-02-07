@@ -64,6 +64,22 @@ export class TextManager {
         mesh.name = id;
         mesh.userData = { isEditableText: true, id: id }; // Marker for raycasting/interaction
 
+        // Create Hit Box for easier selection
+        const box = geometry.boundingBox;
+        const width = box.max.x - box.min.x;
+        const height = box.max.y - box.min.y;
+        const depth = options.height || 1;
+
+        const hitGeometry = new THREE.BoxGeometry(width + 2, height + 2, depth); // Slightly larger
+        const hitMaterial = new THREE.MeshBasicMaterial({ visible: false }); // Invisible
+        const hitMesh = new THREE.Mesh(hitGeometry, hitMaterial);
+
+        // Center hitbox
+        hitMesh.position.z = depth / 2;
+        hitMesh.userData = { isHitBox: true, parentId: id };
+
+        mesh.add(hitMesh);
+
         this.texts.set(id, mesh);
         parentGroup.add(mesh);
     }

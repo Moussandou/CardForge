@@ -261,32 +261,40 @@
     color: var(--color-accent);
 }
 
-.btn-action svg {
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
+/* Action Buttons */
+.btn-action {
+    width: 100%;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+    border-radius: var(--radius-md);
+    transition: all var(--transition);
 }
 
-.btn-action.primary {
-    background: var(--color-accent);
-    color: white;
-    box-shadow:
-        -4px -4px 10px rgba(255, 255, 255, .2),
-        4px 4px 10px rgba(124, 92, 191, .4);
+.btn-action.secondary {
+    background: white;
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
 }
 
-.btn-action.primary:hover {
-    background: var(--color-accent-light);
+.btn-action.secondary:hover {
+    background: var(--color-bg);
+    border-color: var(--color-accent-pale);
+    color: var(--color-accent);
     transform: translateY(-2px);
-    box-shadow:
-        -4px -4px 10px rgba(255, 255, 255, .3),
-        4px 8px 14px rgba(124, 92, 191, .5);
+    box-shadow: var(--shadow-md);
 }
 
-.btn-action.primary:active {
-    box-shadow:
-        inset 2px 2px 5px rgba(0, 0, 0, 0.2);
-    transform: translateY(1px);
+.btn-action.secondary svg {
+    margin-right: 8px;
+    width: 18px;
+    height: 18px;
 }
 
 /* Preset grid */
