@@ -1,7 +1,7 @@
 import { gsap } from 'gsap';
 
 /**
- * Panneau de paramètres avec sections animées via GSAP
+ * Panneau de parametres avec sections animees via GSAP
  */
 export class ControlPanel {
   constructor(container, onUpdate, onExport, sceneRef) {
@@ -9,24 +9,29 @@ export class ControlPanel {
     this.onUpdate = onUpdate;
     this.onExport = onExport;
     this.sceneRef = sceneRef;
-    this.activePanel = 'card';
+    this.activePanel = 'templates';
 
     this.params = {
-      width: 63,
-      height: 88,
+      width: 85,
+      height: 55,
       depth: 2,
-      mainText: 'CardForge',
-      mainTextSize: 8,
-      mainTextPositionY: 10,
+      // Business card fields
+      fullName: 'John Doe',
+      jobTitle: 'CEO & Founder',
+      phone: '06 12 34 56 78',
+      email: 'john@email.com',
+      website: 'www.example.com',
+      // Text settings
+      mainTextSize: 6,
+      mainTextPositionY: 15,
       mainTextMode: 'emboss',
       mainTextColor: 0x2d2640,
-      secondaryText: '',
-      secondaryTextSize: 5,
-      secondaryTextPositionY: -15,
-      secondaryTextColor: 0x6b5f7a,
+      // Frame
       frameEnabled: false,
       frameThickness: 2,
-      cardColor: 0xffffff
+      cardColor: 0xffffff,
+      // Preset
+      activePreset: 'business'
     };
 
     this.render();
@@ -41,8 +46,44 @@ export class ControlPanel {
         <h2>Parametres</h2>
       </div>
 
+      <!-- TEMPLATES SECTION -->
+      <div class="settings-section" data-section="templates">
+        <div class="section-title">Presets</div>
+        <div class="preset-grid">
+          <button class="preset-btn active" data-preset="business">
+            <div class="preset-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <line x1="6" y1="9" x2="12" y2="9"/>
+                <line x1="6" y1="12" x2="10" y2="12"/>
+                <line x1="6" y1="15" x2="14" y2="15"/>
+              </svg>
+            </div>
+            <span>Business</span>
+          </button>
+          <button class="preset-btn" data-preset="minimal">
+            <div class="preset-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <line x1="8" y1="12" x2="16" y2="12"/>
+              </svg>
+            </div>
+            <span>Minimal</span>
+          </button>
+          <button class="preset-btn" data-preset="gaming">
+            <div class="preset-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </div>
+            <span>Gaming</span>
+          </button>
+        </div>
+      </div>
+
       <div class="settings-section" data-section="dimensions">
-        <div class="section-title">Dimensions</div>
+        <div class="section-title">Dimensions (mm)</div>
         <div class="control-row">
           <span class="control-label">Largeur</span>
           <input type="number" class="control-input" id="width" value="${this.params.width}" min="20" max="200">
@@ -57,19 +98,36 @@ export class ControlPanel {
         </div>
       </div>
 
-      <div class="settings-section" data-section="text">
-        <div class="section-title">Texte principal</div>
-        <div class="control-row">
-          <span class="control-label">Contenu</span>
-          <input type="text" class="control-input" id="mainText" value="${this.params.mainText}" style="width:120px;text-align:left">
+      <!-- TEXT SECTION - Business Card Fields -->
+      <div class="settings-section" data-section="text-fields">
+        <div class="section-title">Informations</div>
+        <div class="field-group">
+          <label class="field-label">Nom complet</label>
+          <input type="text" class="control-input full-width" id="fullName" value="${this.params.fullName}" placeholder="John Doe">
         </div>
+        <div class="field-group">
+          <label class="field-label">Poste / Titre</label>
+          <input type="text" class="control-input full-width" id="jobTitle" value="${this.params.jobTitle}" placeholder="CEO & Founder">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Telephone</label>
+          <input type="tel" class="control-input full-width" id="phone" value="${this.params.phone}" placeholder="06 12 34 56 78">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Email</label>
+          <input type="email" class="control-input full-width" id="email" value="${this.params.email}" placeholder="john@email.com">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Site web</label>
+          <input type="text" class="control-input full-width" id="website" value="${this.params.website}" placeholder="www.example.com">
+        </div>
+      </div>
+
+      <div class="settings-section" data-section="text-style">
+        <div class="section-title">Style texte</div>
         <div class="control-row">
           <span class="control-label">Taille</span>
           <input type="number" class="control-input" id="mainTextSize" value="${this.params.mainTextSize}" min="3" max="20">
-        </div>
-        <div class="control-row">
-          <span class="control-label">Position Y</span>
-          <input type="number" class="control-input" id="mainTextPositionY" value="${this.params.mainTextPositionY}" min="-50" max="50">
         </div>
         <div class="control-row">
           <span class="control-label">Couleur</span>
@@ -91,9 +149,10 @@ export class ControlPanel {
         </div>
       </div>
 
-      <div class="settings-section" data-section="card-color">
-        <div class="section-title">Couleur carte</div>
-        <div class="color-grid" id="cardColorGrid">
+      <!-- BACKGROUND SECTION -->
+      <div class="settings-section" data-section="background">
+        <div class="section-title">Couleur de fond</div>
+        <div class="color-grid large" id="cardColorGrid">
           <div class="color-btn active" style="background:#ffffff" data-color="0xffffff"></div>
           <div class="color-btn" style="background:#f5f0ff" data-color="0xf5f0ff"></div>
           <div class="color-btn" style="background:#e8e0f7" data-color="0xe8e0f7"></div>
@@ -103,7 +162,7 @@ export class ControlPanel {
           <div class="color-btn" style="background:#4a4458" data-color="0x4a4458"></div>
           <div class="color-btn" style="background:#a8d5ba" data-color="0xa8d5ba"></div>
           <div class="color-btn" style="background:#f4d9a0" data-color="0xf4d9a0"></div>
-          <div class="color-btn" style="background:#f0b8c4" data-color="0xf0b8c4"></div>
+          <div class="color-btn" style="background:#c5e8f7" data-color="0xc5e8f7"></div>
         </div>
       </div>
 
@@ -120,6 +179,68 @@ export class ControlPanel {
           </div>
           <input type="range" class="slider-track" id="frameThickness" value="${this.params.frameThickness}" min="1" max="10" step="0.5">
         </div>
+      </div>
+
+      <!-- LOGO SECTION -->
+      <div class="settings-section" data-section="logo">
+        <div class="section-title">Logo</div>
+        <div class="upload-zone" id="logoUpload">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+          </svg>
+          <span>Glisser un logo ou cliquer</span>
+          <small>PNG, SVG (max 2MB)</small>
+        </div>
+      </div>
+
+      <!-- SHAPE SECTION -->
+      <div class="settings-section" data-section="shape">
+        <div class="section-title">Formes</div>
+        <div class="shape-grid">
+          <button class="shape-btn" data-shape="circle">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          </button>
+          <button class="shape-btn" data-shape="square">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          </button>
+          <button class="shape-btn" data-shape="triangle">
+            <svg viewBox="0 0 24 24"><polygon points="12,3 22,21 2,21" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          </button>
+          <button class="shape-btn" data-shape="star">
+            <svg viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- IMAGES SECTION -->
+      <div class="settings-section" data-section="images">
+        <div class="section-title">Images</div>
+        <div class="upload-zone" id="imageUpload">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+          <span>Ajouter une image</span>
+          <small>JPG, PNG (max 5MB)</small>
+        </div>
+      </div>
+
+      <!-- QR CODE SECTION -->
+      <div class="settings-section" data-section="qrcode">
+        <div class="section-title">QR Code</div>
+        <div class="field-group">
+          <label class="field-label">URL ou texte</label>
+          <input type="text" class="control-input full-width" id="qrContent" placeholder="https://example.com">
+        </div>
+        <button class="btn-action secondary" id="generateQR">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Generer QR Code
+        </button>
       </div>
 
       <div class="export-group">
@@ -152,10 +273,29 @@ export class ControlPanel {
   }
 
   attachEvents() {
-    const inputs = ['width', 'height', 'depth', 'mainText', 'mainTextSize', 'mainTextPositionY'];
-    inputs.forEach(id => {
+    // Dimension inputs
+    const dimInputs = ['width', 'height', 'depth'];
+    dimInputs.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', () => this.handleChange());
+    });
+
+    // Business card field inputs
+    const fieldInputs = ['fullName', 'jobTitle', 'phone', 'email', 'website', 'mainTextSize'];
+    fieldInputs.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', () => this.handleChange());
+    });
+
+    // Preset buttons
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        this.params.activePreset = e.currentTarget.dataset.preset;
+        this.applyPreset(this.params.activePreset);
+        gsap.from(e.currentTarget, { scale: 0.95, duration: 0.2 });
+      });
     });
 
     // Mode buttons
@@ -218,6 +358,30 @@ export class ControlPanel {
     // Toolbar controls
     this.attachToolbarEvents();
     this.attachSidebarEvents();
+  }
+
+  applyPreset(preset) {
+    switch (preset) {
+      case 'business':
+        this.params.width = 85;
+        this.params.height = 55;
+        this.params.depth = 2;
+        break;
+      case 'minimal':
+        this.params.width = 85;
+        this.params.height = 55;
+        this.params.depth = 1.5;
+        break;
+      case 'gaming':
+        this.params.width = 90;
+        this.params.height = 60;
+        this.params.depth = 3;
+        break;
+    }
+    document.getElementById('width').value = this.params.width;
+    document.getElementById('height').value = this.params.height;
+    document.getElementById('depth').value = this.params.depth;
+    this.onUpdate(this.params);
   }
 
   attachToolbarEvents() {
@@ -288,9 +452,13 @@ export class ControlPanel {
         const sectionType = section.dataset.section;
         let show = false;
 
-        if (panel === 'card') show = ['dimensions', 'frame'].includes(sectionType);
-        else if (panel === 'text') show = ['text', 'mode'].includes(sectionType);
-        else if (panel === 'style') show = ['card-color', 'frame'].includes(sectionType);
+        if (panel === 'templates') show = ['templates', 'dimensions'].includes(sectionType);
+        else if (panel === 'text') show = ['text-fields', 'text-style', 'mode'].includes(sectionType);
+        else if (panel === 'background') show = ['background', 'frame'].includes(sectionType);
+        else if (panel === 'logo') show = ['logo'].includes(sectionType);
+        else if (panel === 'shape') show = ['shape'].includes(sectionType);
+        else if (panel === 'images') show = ['images'].includes(sectionType);
+        else if (panel === 'qrcode') show = ['qrcode'].includes(sectionType);
 
         section.style.display = show ? 'block' : 'none';
         if (show && animate) {
@@ -309,12 +477,15 @@ export class ControlPanel {
   handleChange() {
     this.params = {
       ...this.params,
-      width: parseFloat(document.getElementById('width').value),
-      height: parseFloat(document.getElementById('height').value),
-      depth: parseFloat(document.getElementById('depth').value),
-      mainText: document.getElementById('mainText').value,
-      mainTextSize: parseFloat(document.getElementById('mainTextSize').value),
-      mainTextPositionY: parseFloat(document.getElementById('mainTextPositionY').value)
+      width: parseFloat(document.getElementById('width')?.value || this.params.width),
+      height: parseFloat(document.getElementById('height')?.value || this.params.height),
+      depth: parseFloat(document.getElementById('depth')?.value || this.params.depth),
+      fullName: document.getElementById('fullName')?.value || this.params.fullName,
+      jobTitle: document.getElementById('jobTitle')?.value || this.params.jobTitle,
+      phone: document.getElementById('phone')?.value || this.params.phone,
+      email: document.getElementById('email')?.value || this.params.email,
+      website: document.getElementById('website')?.value || this.params.website,
+      mainTextSize: parseFloat(document.getElementById('mainTextSize')?.value || this.params.mainTextSize)
     };
     this.onUpdate(this.params);
   }
